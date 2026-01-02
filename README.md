@@ -79,3 +79,7 @@ See repository for license information.
 
 ## Screenshots
 ![Screenshot 1](./.github/image.png)
+
+## TODO
+- Add multi instance support and default instance selection
+- Desktop application ?
