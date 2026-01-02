@@ -76,3 +76,6 @@ Feel free to open issues or PRs on the repository: https://github.com/Khuirul-Hu
 
 ## License
 See repository for license information.
+
+## Screenshots
+![Screenshot 1](./.github/image.png)
