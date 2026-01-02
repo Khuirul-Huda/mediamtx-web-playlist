@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaMTX Web Playlist</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            glow: '#3b82f680', 
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 10s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Animated Background Base */
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+
+        /* Ambient Background Blobs */
+        .ambient-light {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: blob 20s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #4c1d95; animation-delay: 0s; }
+        .blob-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #1e3a8a; animation-delay: 2s; }
+        .blob-3 { bottom: 20%; left: 20%; width: 30vw; height: 30vw; background: #0f766e; animation-delay: 4s; }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-sidebar {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #94a3b8;
+        }
+        .calendar-day:hover:not(.empty) {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .calendar-day.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .calendar-day.today {
+            border: 1px solid #3b82f6;
+        }
+        .calendar-day.empty {
+            cursor: default;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        /* Loading Spinner */
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-bottom-color: #3b82f6;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .active-item {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0) 100%);
+            border-left: 3px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased h-screen flex text-sm selection:bg-brand-500 selection:text-white">
+
+    <!-- Background Animation -->
+    <div class="ambient-light">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="glass-sidebar w-80 flex-shrink-0 flex flex-col fixed md:relative h-full z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        
+        <!-- Header -->
+        <div class="h-20 flex items-center px-6 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-play text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight text-white leading-none">MediaMTX</h1>
+                    <span class="text-xs text-brand-400 font-medium tracking-wide">PLAYBACK</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-6">
+            
+            <!-- Connection Section -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between cursor-pointer" onclick="toggleSection('configSection')">
+                    <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-gear text-[10px]"></i> Config
+                    </h2>
+                    <div id="statusDot" class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] transition-colors duration-300"></div>
+                </div>
+                
+                <form id="settingsForm" class="space-y-3" id="configSection">
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-500 ml-1">Server Host</label>
+                        <input type="text" id="hostInput" placeholder="http://localhost:9996" 
+                            class="glass-input w-full rounded-lg py-1.5 px-3 text-xs placeholder-gray-600 focus:outline-none" required>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-500 ml-1">Stream Name</label>
+                        <input type="text" id="pathInput" placeholder="cam1" 
+                            class="glass-input w-full rounded-lg py-1.5 px-3 text-xs placeholder-gray-600 focus:outline-none" required>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-black/20 p-2 rounded-lg border border-white/5">
+                        <span class="text-xs text-gray-300 pl-1">Force MP4</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="formatToggle" class="sr-only peer">
+                            <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-300 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full bg-brand-600/20 hover:bg-brand-600/40 border border-brand-500/30 text-brand-200 py-2 rounded-lg text-xs transition-colors">
+                        Connect & Save
+                    </button>
+                </form>
+            </div>
+
+            <!-- Calendar Section -->
+            <div class="space-y-3">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-regular fa-calendar text-[10px]"></i> Date Selection
+                </h2>
+                
+                <div class="bg-black/20 p-3 rounded-xl border border-white/5">
+                    <!-- Calendar Controls -->
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <button id="prevMonth" class="text-gray-400 hover:text-white p-1"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                        <span id="currentMonthYear" class="text-xs font-bold text-gray-200">January 2024</span>
+                        <button id="nextMonth" class="text-gray-400 hover:text-white p-1"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                    </div>
+                    
+                    <!-- Weekdays -->
+                    <div class="grid grid-cols-7 gap-1 mb-2 text-center">
+                        <span class="text-[10px] text-gray-600 font-bold">S</span>
+                        <span class="text-[10px] text-gray-600 font-bold">M</span>
+                        <span class="text-[10px] text-gray-600 font-bold">T</span>
+                        <span class="text-[10px] text-gray-600 font-bold">W</span>
+                        <span class="text-[10px] text-gray-600 font-bold">T</span>
+                        <span class="text-[10px] text-gray-600 font-bold">F</span>
+                        <span class="text-[10px] text-gray-600 font-bold">S</span>
+                    </div>
+
+                    <!-- Days Grid -->
+                    <div id="calendarGrid" class="calendar-grid">
+                        <!-- Generated by JS -->
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-white/5 space-y-2">
+                        <div class="flex items-center justify-between text-[10px] text-gray-500 mb-1">
+                            <span>Manual Range</span>
+                            <span class="text-brand-400 cursor-pointer hover:underline" onclick="setToday()">Reset to Today</span>
+                        </div>
+                        <input type="datetime-local" id="filterStart" class="glass-input w-full rounded-lg px-2 py-1.5 text-[10px] text-gray-300 focus:text-white">
+                        <input type="datetime-local" id="filterEnd" class="glass-input w-full rounded-lg px-2 py-1.5 text-[10px] text-gray-300 focus:text-white">
+                        
+                        <button onclick="fetchRecordings()" class="w-full mt-2 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-600/20 text-white text-xs font-medium transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-filter"></i> Apply Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-white/5 bg-black/20">
+            <a href="https://github.com/Khuirul-Huda/mediamtx-web-playlist" target="_blank" class="flex items-center gap-3 text-gray-500 hover:text-white transition-colors group">
+                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                    <i class="fa-brands fa-github text-lg"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs font-medium group-hover:text-brand-400 transition-colors">View on GitHub</span>
+                    <span class="text-[10px] text-gray-600">Khuirul-Huda/mediamtx-web-playlist</span>
+                </div>
+            </a>
+            <div class="mt-2 text-[10px] text-gray-500/80 px-2">
+                <p class="m-0">Not affiliated with MediaMTX.</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col relative h-full overflow-hidden">
+        
+        <!-- Mobile Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-30 hidden md:hidden opacity-0 transition-opacity duration-300"></div>
+
+        <!-- Top Bar -->
+        <header class="h-20 flex items-center justify-between px-6 md:px-8 border-b border-white/5 bg-transparent relative z-20">
+            <div class="flex items-center gap-4">
+                <button id="menuBtn" class="md:hidden w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-white border border-white/10 active:bg-white/10">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Archives</h2>
+                    <p class="text-xs text-gray-400" id="currentConfigDisplay">No stream selected</p>
+                </div>
+            </div>
+            
+            <!-- Quick Stats / Clock -->
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex flex-col items-end mr-2">
+                    <span class="text-sm font-medium text-white" id="clock">00:00:00</span>
+                    <span class="text-[10px] text-brand-400 font-bold tracking-wider">LIVE TIME</span>
+                </div>
+                <div class="h-8 w-[1px] bg-white/10 hidden sm:block"></div>
+                <div class="bg-white/5 px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></div>
+                    <span class="text-xs font-medium text-gray-300" id="itemCountBadge">0 Clips</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Split View Content -->
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative z-10">
+            
+            <!-- Left: Video Player -->
+            <div class="flex-1 p-4 md:p-8 overflow-y-auto flex flex-col justify-center">
+                
+                <div class="w-full max-w-5xl mx-auto space-y-6">
+                    <!-- Player Container -->
+                    <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 group ring-1 ring-white/5">
+                        <video id="mainPlayer" controls class="w-full h-full object-contain" poster="">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        <!-- Empty State Overlay -->
+                        <div id="playerPlaceholder" class="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center z-10">
+                            <div class="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-2xl shadow-brand-500/10">
+                                <i class="fa-solid fa-play text-2xl text-gray-500 ml-1"></i>
+                            </div>
+                            <h3 class="text-xl font-medium text-white mb-2">Ready to Play</h3>
+                            <p class="text-gray-500 text-sm">Select a clip from the playlist to begin</p>
+                        </div>
+                    </div>
+
+                    <!-- Meta Data Panel (Relayout) -->
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col gap-4 opacity-0 animate-slide-up" style="animation-delay: 0.2s; animation-fill-mode: forwards;">
+                        
+                        <!-- Top Row: Title & Duration -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <h3 class="text-lg font-bold text-white" id="videoTitle">Waiting for selection...</h3>
+                            <span class="bg-brand-500/10 text-brand-400 px-3 py-1 rounded-full border border-brand-500/20 text-xs font-mono whitespace-nowrap" id="videoDuration">00s</span>
+                        </div>
+
+                        <!-- Middle Row: URL (Full Width) -->
+                        <div class="w-full bg-black/20 rounded-lg p-2 border border-white/5 flex items-center gap-2">
+                            <i class="fa-solid fa-link text-gray-500 text-xs pl-1"></i>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs text-gray-400 font-mono truncate select-all" id="videoUrlDisplay">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Row: Actions (Full Width / Grid) -->
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <button onclick="copyLink()" class="py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-all active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-regular fa-copy"></i> Copy URL
+                            </button>
+                            <button id="downloadBtn" onclick="triggerDownload()" class="py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-600/20 text-white text-sm font-medium transition-all active:scale-95 flex items-center justify-center gap-2 pointer-events-none opacity-50 grayscale disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-download"></i> <span id="downloadText">Download</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Playlist -->
+            <div class="w-full lg:w-[420px] glass-panel border-l border-white/5 flex flex-col h-[40vh] lg:h-auto">
+                <div class="p-4 border-b border-white/5 bg-white/5 backdrop-blur-xl flex justify-between items-center sticky top-0 z-20">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-gray-300 uppercase tracking-wider">Recordings</span>
+                        <span id="lastUpdated" class="text-[10px] text-gray-500 font-mono mt-0.5">Updated: --:--</span>
+                    </div>
+                    <button onclick="fetchRecordings()" class="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full" title="Refresh">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-3 space-y-2" id="playlistContainer">
+                    <!-- Dynamic Content -->
+                    <div class="flex flex-col items-center justify-center h-full text-gray-500 space-y-3 opacity-60">
+                        <i class="fa-solid fa-photo-film text-3xl"></i>
+                        <p class="text-sm">List empty</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 glass-panel px-5 py-4 rounded-xl shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 z-50 flex items-center gap-4 border-l-4 border-brand-500">
+        <div class="w-8 h-8 rounded-full bg-brand-500/20 flex items-center justify-center flex-shrink-0">
+            <i id="toastIcon" class="fa-solid fa-bell text-brand-400 text-sm"></i>
+        </div>
+        <div>
+            <h4 class="text-sm font-bold text-white mb-0.5" id="toastTitle">Notification</h4>
+            <p class="text-xs text-gray-400" id="toastMessage">Details here</p>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DOM Elements ---
+        const settingsForm = document.getElementById('settingsForm');
+        const hostInput = document.getElementById('hostInput');
+        const pathInput = document.getElementById('pathInput');
+        const formatToggle = document.getElementById('formatToggle');
+        const playlistContainer = document.getElementById('playlistContainer');
+        const mainPlayer = document.getElementById('mainPlayer');
+        const playerPlaceholder = document.getElementById('playerPlaceholder');
+        const videoTitle = document.getElementById('videoTitle');
+        const videoDuration = document.getElementById('videoDuration');
+        const videoUrlDisplay = document.getElementById('videoUrlDisplay');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadText = document.getElementById('downloadText');
+        const statusDot = document.getElementById('statusDot');
+        const filterStart = document.getElementById('filterStart');
+        const filterEnd = document.getElementById('filterEnd');
+        const itemCountBadge = document.getElementById('itemCountBadge');
+        const currentConfigDisplay = document.getElementById('currentConfigDisplay');
+        const lastUpdatedDisplay = document.getElementById('lastUpdated');
+        
+        // --- State ---
+        let config = {
+            host: localStorage.getItem('mmtx_host') || 'http://localhost:9996',
+            path: localStorage.getItem('mmtx_path') || '',
+            useMp4: localStorage.getItem('mmtx_mp4') === 'true'
+        };
+
+        // Calendar State
+        let currentCalendarDate = new Date();
+        let selectedDate = new Date();
+        let currentStreamUrl = "";
+
+        // --- Init ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Restore Settings
+            hostInput.value = config.host;
+            pathInput.value = config.path;
+            formatToggle.checked = config.useMp4;
+
+            // Set Time (Today)
+            setToday();
+
+            // Init Calendar
+            renderCalendar();
+
+            // UI Updates
+            updateStatusUI();
+            startClock();
+
+            // Auto-fetch if configured
+            if(config.host && config.path) {
+                fetchRecordings();
+            }
+        });
+
+        // --- Calendar Logic ---
+        function setToday() {
+            const now = new Date();
+            const start = new Date(now);
+            start.setHours(0, 0, 0, 0);
+            
+            const end = new Date(now);
+            end.setHours(23, 59, 59, 999);
+
+            setFilterDates(start, end);
+            selectedDate = now;
+            renderCalendar();
+            // After resetting the date range to today, refresh the recordings list
+            // so the UI reflects the new selection immediately.
+            fetchRecordings();
+        }
+
+        function setFilterDates(start, end) {
+            const toLocalIso = (date) => {
+                const offset = date.getTimezoneOffset() * 60000;
+                return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+            };
+            filterStart.value = toLocalIso(start);
+            filterEnd.value = toLocalIso(end);
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthLabel = document.getElementById('currentMonthYear');
+            
+            grid.innerHTML = '';
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            monthLabel.innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Empty slots for previous month
+            for (let i = 0; i < firstDay; i++) {
+                const el = document.createElement('div');
+                el.className = 'calendar-day empty';
+                grid.appendChild(el);
+            }
+
+            // Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const el = document.createElement('div');
+                el.className = 'calendar-day';
+                el.innerText = day;
+                
+                // Check if Today
+                const today = new Date();
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    el.classList.add('today');
+                }
+
+                // Check if Selected
+                if (day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
+                    el.classList.add('active');
+                }
+
+                el.onclick = () => {
+                    selectedDate = new Date(year, month, day);
+                    // Set range to full day
+                    const start = new Date(selectedDate); start.setHours(0,0,0,0);
+                    const end = new Date(selectedDate); end.setHours(23,59,59,999);
+                    setFilterDates(start, end);
+                    renderCalendar(); // Re-render to update selection
+                    fetchRecordings(); // Auto fetch
+                };
+
+                grid.appendChild(el);
+            }
+        }
+
+        document.getElementById('prevMonth').onclick = () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        };
+
+        document.getElementById('nextMonth').onclick = () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        };
+
+        // --- Core Application Logic ---
+
+        settingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            let host = hostInput.value.trim();
+            if(host.endsWith('/')) host = host.slice(0, -1);
+
+            config.host = host;
+            config.path = pathInput.value.trim();
+            
+            localStorage.setItem('mmtx_host', config.host);
+            localStorage.setItem('mmtx_path', config.path);
+
+            showToast('Configuration Saved', 'Connection settings updated successfully', 'success');
+            updateStatusUI();
+            fetchRecordings();
+        });
+
+        formatToggle.addEventListener('change', (e) => {
+            config.useMp4 = e.target.checked;
+            localStorage.setItem('mmtx_mp4', config.useMp4);
+            showToast('Format Updated', `Now using ${config.useMp4 ? 'MP4' : 'fMP4'} format`, 'info');
+        });
+
+        function updateStatusUI() {
+            if(config.host && config.path) {
+                statusDot.classList.replace('bg-red-500', 'bg-emerald-500');
+                statusDot.classList.replace('shadow-[0_0_10px_rgba(239,68,68,0.5)]', 'shadow-[0_0_10px_rgba(16,185,129,0.5)]');
+                currentConfigDisplay.innerText = `${config.path} @ ${new URL(config.host).hostname}`;
+            } else {
+                statusDot.classList.replace('bg-emerald-500', 'bg-red-500');
+                statusDot.classList.replace('shadow-[0_0_10px_rgba(16,185,129,0.5)]', 'shadow-[0_0_10px_rgba(239,68,68,0.5)]');
+                currentConfigDisplay.innerText = 'Not Configured';
+            }
+        }
+
+        function updateLastRefreshedTime() {
+            const now = new Date();
+            lastUpdatedDisplay.innerText = `Updated: ${now.toLocaleTimeString()}`;
+        }
+
+        async function fetchRecordings() {
+            if(!config.host || !config.path) return;
+
+            // Loader
+            playlistContainer.innerHTML = '<div class="h-full flex items-center justify-center"><div class="loader"></div></div>';
+
+            try {
+                const startDate = new Date(filterStart.value).toISOString();
+                const endDate = new Date(filterEnd.value).toISOString();
+
+                const url = `${config.host}/list?path=${encodeURIComponent(config.path)}&start=${encodeURIComponent(startDate)}&end=${encodeURIComponent(endDate)}`;
+
+                const response = await fetch(url);
+                
+                // --- FIX START: Handle 404 (No recordings) specifically ---
+                if (response.status === 404) {
+                    renderPlaylist([]); // Treat 404 as empty list
+                    updateLastRefreshedTime();
+                    return; // Stop execution so it doesn't hit the error block
+                }
+                // --- FIX END ---
+
+                if (!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
+                renderPlaylist(data);
+                showToast('Sync Complete', `Found ${data ? data.length : 0} recordings`, 'success');
+                updateLastRefreshedTime();
+
+            } catch (error) {
+                console.error(error);
+                playlistContainer.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-red-400 opacity-80 p-4 text-center">
+                        <i class="fa-solid fa-wifi text-3xl mb-2"></i>
+                        <p class="text-sm font-medium">Connection Failed</p>
+                        <p class="text-xs opacity-60 mt-1">Check CORS settings or URL</p>
+                    </div>
+                `;
+                showToast('Error', 'Failed to fetch recordings. Check console.', 'error');
+                updateLastRefreshedTime();
+            }
+        }
+
+        function renderPlaylist(items) {
+            playlistContainer.innerHTML = '';
+            
+            if(!items || items.length === 0) {
+                const selectedDateStr = new Date(filterStart.value).toLocaleDateString();
+                playlistContainer.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-gray-500 opacity-60 text-center px-4">
+                        <i class="fa-regular fa-calendar-xmark text-3xl mb-2"></i>
+                        <p class="text-sm">Recording not found on selected date<br/><span class="font-mono text-xs">${selectedDateStr}</span></p>
+                    </div>
+                `;
+                itemCountBadge.innerText = '0 Clips';
+                return;
+            }
+
+            // Sort Descending
+            items.sort((a, b) => new Date(b.start) - new Date(a.start));
+            itemCountBadge.innerText = `${items.length} Clips`;
+
+            items.forEach((item, index) => {
+                const el = document.createElement('div');
+                const start = new Date(item.start);
+                const duration = parseFloat(item.duration);
+                const end = new Date(start.getTime() + (duration * 1000));
+                
+                // Day/Night Logic (Simple 6am - 6pm check)
+                const hour = start.getHours();
+                const isDay = hour >= 6 && hour < 18;
+                const iconClass = isDay ? "fa-sun text-yellow-400" : "fa-moon text-blue-300";
+                const bgClass = isDay ? "bg-yellow-500/10" : "bg-blue-500/10";
+
+                // Format Times
+                const startTimeStr = start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                const endTimeStr = end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                
+                // Animation delay staggering
+                const delay = Math.min(index * 0.05, 0.5); 
+                el.style.animationDelay = `${delay}s`;
+
+                el.className = 'glass-card p-3 rounded-xl cursor-pointer opacity-0 animate-fade-in group relative overflow-hidden';
+                
+                el.innerHTML = `
+                    <div class="flex items-center gap-3 relative z-10">
+                        <!-- Icon Box -->
+                        <div class="w-10 h-10 rounded-lg ${bgClass} flex items-center justify-center flex-shrink-0 transition-colors">
+                            <i class="fa-solid ${iconClass} text-sm"></i>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <span class="text-xs font-bold text-gray-200 group-hover:text-white truncate">
+                                    ${startTimeStr} <span class="text-gray-600 px-1">→</span> ${endTimeStr}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-gray-500 font-mono">${start.toLocaleDateString()}</span>
+                                <span class="text-[10px] font-mono bg-white/5 px-1.5 py-0.5 rounded text-gray-400 border border-white/5">
+                                    ${duration.toFixed(1)}s
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Hover Glow Effect -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                `;
+
+                el.onclick = () => {
+                    // Remove active class from others
+                    document.querySelectorAll('.active-item').forEach(e => {
+                        e.classList.remove('active-item');
+                        e.classList.add('glass-card');
+                    });
+                    
+                    // Add active class
+                    el.classList.remove('glass-card');
+                    el.classList.add('active-item');
+                    
+                    playVideo(item);
+                };
+
+                playlistContainer.appendChild(el);
+            });
+        }
+
+        function playVideo(item) {
+            playerPlaceholder.style.display = 'none';
+
+            let streamUrl = `${config.host}/get?path=${encodeURIComponent(config.path)}&start=${encodeURIComponent(item.start)}&duration=${item.duration}`;
+            
+            if(config.useMp4) {
+                streamUrl += '&format=mp4';
+            }
+
+            currentStreamUrl = streamUrl;
+
+            videoTitle.innerText = `Recording: ${new Date(item.start).toLocaleString()}`;
+            videoDuration.innerText = `${parseFloat(item.duration).toFixed(1)}s`;
+            videoUrlDisplay.innerText = streamUrl;
+            
+            // Enable download button
+            downloadBtn.classList.remove('pointer-events-none', 'opacity-50', 'grayscale');
+            
+            mainPlayer.src = streamUrl;
+            mainPlayer.type = config.useMp4 ? 'video/mp4' : 'video/mp4';
+            mainPlayer.play().catch(console.warn);
+
+            // Scroll for mobile
+            if(window.innerWidth < 1024) {
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            }
+        }
+
+        function copyLink() {
+            const url = videoUrlDisplay.innerText;
+            if(url.length < 5) return;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('Copied', 'Stream URL copied to clipboard', 'info');
+            });
+        }
+
+        async function triggerDownload() {
+            if (!currentStreamUrl) return;
+
+            const btn = document.getElementById('downloadBtn');
+            const txt = document.getElementById('downloadText');
+            const originalText = "Download";
+
+            try {
+                // UI Loading State
+                btn.disabled = true;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                txt.innerText = "Connecting...";
+
+                const response = await fetch(currentStreamUrl);
+                if (!response.ok) throw new Error("Download failed");
+
+                // Get Content Length (might be null for chunked)
+                const contentLength = response.headers.get('Content-Length');
+                const total = contentLength ? parseInt(contentLength, 10) : 0;
+                let loaded = 0;
+
+                const reader = response.body.getReader();
+                const chunks = [];
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    chunks.push(value);
+                    loaded += value.length;
+
+                    // Update Progress UI
+                    if (total > 0) {
+                        const progress = Math.round((loaded / total) * 100);
+                        txt.innerText = `${progress}%`;
+                    } else {
+                        // If size unknown, show downloaded MB
+                        const mb = (loaded / (1024 * 1024)).toFixed(1);
+                        txt.innerText = `${mb} MB`;
+                    }
+                }
+
+                // Processing Blob
+                txt.innerText = "Saving...";
+                const blob = new Blob(chunks);
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                a.download = `recording-${timestamp}.mp4`;
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showToast('Success', 'Download complete', 'success');
+
+            } catch (error) {
+                console.error("Download error:", error);
+                showToast('Error', 'Failed to download directly. Opening in new tab.', 'error');
+                window.open(currentStreamUrl, '_blank');
+            } finally {
+                // Reset UI
+                txt.innerText = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+
+        // --- Helpers ---
+
+        function showToast(title, message, type) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = message;
+            
+            // Type Styling
+            const icon = document.getElementById('toastIcon');
+            if(type === 'success') {
+                toast.classList.replace('border-brand-500', 'border-emerald-500');
+                icon.className = 'fa-solid fa-check text-emerald-400 text-sm';
+            } else if (type === 'error') {
+                toast.classList.replace('border-brand-500', 'border-red-500');
+                icon.className = 'fa-solid fa-triangle-exclamation text-red-400 text-sm';
+            } else {
+                toast.classList.replace('border-emerald-500', 'border-brand-500');
+                toast.classList.replace('border-red-500', 'border-brand-500');
+                icon.className = 'fa-solid fa-bell text-brand-400 text-sm';
+            }
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 3000);
+        }
+
+        function startClock() {
+            setInterval(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        }
+
+        // Mobile Nav
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+
+        const toggleMenu = () => {
+            const isHidden = sidebar.classList.contains('-translate-x-full');
+            if(isHidden) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden', 'opacity-0');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        };
+
+        menuBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+    </script>
+</body>
+</html>
