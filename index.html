@@ -396,8 +396,16 @@
                 </div>
             </div>
 
-            <!-- Right: Playlist -->
-            <div class="w-full lg:w-[420px] glass-panel border-l border-white/5 flex flex-col h-[40vh] lg:h-auto">
+            <!-- Right: Playlist (toggleable on mobile) -->
+            <!-- Toggle button, only visible on mobile -->
+            <button id="playlistToggleBtn" class="fixed bottom-6 right-6 z-40 bg-brand-500 text-white rounded-full shadow-lg p-4 md:hidden focus:outline-none focus:ring-2 focus:ring-brand-400" type="button" aria-label="Show Recordings">
+                <i class="fa-solid fa-list"></i>
+            </button>
+            <div id="playlistPanel" class="w-full lg:w-[420px] glass-panel border-l border-white/5 flex flex-col h-[60vh] max-h-[80vh] lg:h-auto fixed left-0 right-0 bottom-0 top-auto z-50 md:static md:inset-auto md:z-auto transition-transform duration-300 md:translate-x-0 translate-y-full md:translate-y-0 md:block">
+                <!-- Close button, only on mobile (centered above header) -->
+                <button id="playlistCloseBtn" class="md:hidden absolute left-1/2 top-2 -translate-x-1/2 bg-black/70 text-white rounded-full p-2 z-30 shadow-lg" type="button" aria-label="Close Recordings">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
                 <div class="p-4 border-b border-white/5 bg-white/5 backdrop-blur-xl flex justify-between items-center sticky top-0 z-20">
                     <div class="flex flex-col">
                         <span class="text-xs font-bold text-gray-300 uppercase tracking-wider">Recordings</span>
@@ -418,7 +426,48 @@
             </div>
 
         </div>
-    </main>
+
+    <script>
+    // Playlist toggle logic for mobile
+    const playlistToggleBtn = document.getElementById('playlistToggleBtn');
+    const playlistPanel = document.getElementById('playlistPanel');
+    function showPlaylist() {
+        playlistPanel.classList.remove('translate-y-full');
+        playlistPanel.classList.add('translate-y-0');
+    }
+    function hidePlaylist() {
+        playlistPanel.classList.remove('translate-y-0');
+        playlistPanel.classList.add('translate-y-full');
+    }
+    playlistToggleBtn.addEventListener('click', showPlaylist);
+    // Close button logic
+    const playlistCloseBtn = document.getElementById('playlistCloseBtn');
+    playlistCloseBtn.addEventListener('click', hidePlaylist);
+
+    // Hide playlist when clicking outside (on overlay)
+    playlistPanel.addEventListener('click', function(e) {
+        if (window.innerWidth < 1024 && e.target === playlistPanel) hidePlaylist();
+    });
+    // Optionally, hide on ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && window.innerWidth < 1024) hidePlaylist();
+    });
+
+    // Auto-close playlist overlay when a playlist item is clicked (mobile only)
+    playlistContainer.addEventListener('click', function(e) {
+        if (window.innerWidth < 1024) {
+            // Only close if a playlist item (glass-card or active-item) is clicked
+            let el = e.target;
+            while (el && el !== playlistContainer) {
+                if (el.classList && (el.classList.contains('glass-card') || el.classList.contains('active-item'))) {
+                    hidePlaylist();
+                    break;
+                }
+                el = el.parentElement;
+            }
+        }
+    });
+    </script>
 
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 right-6 glass-panel px-5 py-4 rounded-xl shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 z-50 flex items-center gap-4 border-l-4 border-brand-500">
