@@ -29,9 +29,8 @@ mediamtx-web-playlist/
 
 ## Quick Start
 
-### Option 1: Using Bun (Recommended)
+### Option 1: Using Bun 
 ```bash
-bun install
 bun run server.js
 ```
 
@@ -120,3 +119,6 @@ See repository for license information.
 ## TODO
 - Add multi instance support and default instance selection
 - Desktop application ?
+
+## Known Issues
+- Playback not seekable due to server limitations. See: [https://github.com/bluenviron/mediamtx/issues/4199](https://github.com/bluenviron/mediamtx/issues/4199)
