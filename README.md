@@ -1,35 +1,72 @@
 # MediaMTX Web Playlist
 
-A lightweight single-file web UI for browsing and playing recorded clips from a MediaMTX (rtsp/rtmp/hls) server.
+A modern web UI for browsing and playing recorded clips from a MediaMTX (rtsp/rtmp/hls) server with multi-channel support.
 
-This repository contains a single `index.html` file that bundles the entire UI (HTML, CSS, and JavaScript) so it can be served directly from any static host or opened locally without a build step.
+This repository provides a clean, organized web application with separated HTML, CSS, and JavaScript files following web development best practices.
 
-## Why a single-file
-The app is intentionally provided as a single HTML file to keep things simple and portable:
+## Features
 
-- Easy to deploy: drop `index.html` on any static host (GitHub Pages, Netlify, S3, local file server).
-- Zero build tooling: no npm, bundler, or compilation required.
-- Portable: easy to copy between machines or embed inside other systems.
+- 🎥 **Multi-Channel Support**: Manage multiple MediaMTX streams from a single interface
+- 💾 **LocalStorage Persistence**: All channels and settings are saved locally
+- 📅 **Calendar-based Navigation**: Intuitive date selection with visual calendar
+- 🎨 **Modern Glassmorphism UI**: Beautiful animated background with glass effects
+- 📱 **Fully Responsive**: Works seamlessly on desktop, tablet, and mobile
+- ⬇️ **Direct Downloads**: Download recordings with progress indication
+- 🔄 **Auto-refresh**: Real-time updates with manual refresh option
 
-If you prefer a multi-file or build-based setup, consider extracting the JS/CSS into separate files and adding a packager.
+## Project Structure
+
+```
+mediamtx-web-playlist/
+├── index.html          # Main HTML file
+├── css/
+│   └── styles.css      # All styling and animations
+├── js/
+│   └── app.js          # Application logic and channel management
+├── server.js           # Optional Bun server for local development
+└── README.md
+```
 
 ## Quick Start
-1. Serve the folder with a static server (recommended) or open `index.html` directly in modern browsers.
 
-Example (Python):
+### Option 1: Using Bun (Recommended)
+```bash
+bun install
+bun run server.js
+```
 
+### Option 2: Using Python
 ```bash
 python3 -m http.server 8000
 ```
 
+### Option 3: Using Node.js
+```bash
+npx http-server -p 8000
+```
+
 Then open http://localhost:8000 in your browser.
 
-## Configuration (in the UI)
-- Server Host: base URL of your MediaMTX API (example: `http://localhost:9996`). Do not include a trailing slash.
-- Stream Name: stream path/name as used by your MediaMTX instance (example: `cam1`).
-- Force MP4: toggle whether the `/get` endpoint should return mp4 format.
+## Multi-Channel Usage
 
-After filling those fields, click `Connect & Save`. The app persists these values in `localStorage`.
+### Adding a Channel
+1. In the sidebar, find the "Channels" section
+2. Enter a name for your channel (e.g., "Front Door Cam")
+3. Click "Add" button
+4. Configure the newly created channel with host and stream name
+
+### Managing Channels
+- **Switch Channel**: Click on any channel in the list to switch to it
+- **Delete Channel**: Click the trash icon next to a channel to remove it
+- **Active Channel**: The currently active channel is highlighted with a blue accent
+
+### Channel Configuration
+For each channel, configure:
+- **Server Host**: Base URL of your MediaMTX API (e.g., `http://localhost:9996`)
+- **Stream Name**: Stream path/name (e.g., `cam1`, `frontdoor`, etc.)
+- **Force MP4**: Toggle MP4 format for compatibility
+
+All settings are automatically saved to localStorage.
 
 ## How to use
 - Date selection: use the calendar or the manual `Start` / `End` datetime inputs. Click `Apply Filter` to fetch recordings for the selected range.

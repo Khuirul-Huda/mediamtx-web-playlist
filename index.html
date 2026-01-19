@@ -14,6 +14,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+
     <!-- Tailwind Config -->
     <script>
         tailwind.config = {
@@ -56,132 +59,6 @@
             }
         }
     </script>
-
-    <style>
-        /* Animated Background Base */
-        body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            overflow: hidden;
-        }
-
-        /* Ambient Background Blobs */
-        .ambient-light {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            z-index: -1;
-        }
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: blob 20s infinite alternate;
-        }
-        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #4c1d95; animation-delay: 0s; }
-        .blob-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #1e3a8a; animation-delay: 2s; }
-        .blob-3 { bottom: 20%; left: 20%; width: 30vw; height: 30vw; background: #0f766e; animation-delay: 4s; }
-
-        /* Glassmorphism Utilities */
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-        
-        .glass-sidebar {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .glass-input {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .glass-input:focus {
-            background: rgba(0, 0, 0, 0.5);
-            border-color: #3b82f6;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.2s ease;
-        }
-        .glass-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        /* Calendar Styles */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #94a3b8;
-        }
-        .calendar-day:hover:not(.empty) {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-        .calendar-day.active {
-            background: #3b82f6;
-            color: white;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-        }
-        .calendar-day.today {
-            border: 1px solid #3b82f6;
-        }
-        .calendar-day.empty {
-            cursor: default;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
-
-        /* Loading Spinner */
-        .loader {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-bottom-color: #3b82f6;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-        }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .active-item {
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0) 100%);
-            border-left: 3px solid #3b82f6;
-        }
-    </style>
 </head>
 <body class="font-sans antialiased h-screen flex text-sm selection:bg-brand-500 selection:text-white">
 
@@ -196,7 +73,7 @@
     <aside id="sidebar" class="glass-sidebar w-80 flex-shrink-0 flex flex-col fixed md:relative h-full z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
         
         <!-- Header -->
-        <div class="h-20 flex items-center px-6 border-b border-white/5">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-white/5">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
                     <i class="fa-solid fa-play text-white text-lg"></i>
@@ -206,13 +83,34 @@
                     <span class="text-xs text-brand-400 font-medium tracking-wide">PLAYBACK</span>
                 </div>
             </div>
+            <!-- Privacy Toggle Button -->
+            <button id="privacyToggle" title="Toggle Privacy Mode" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-brand-400 transition-all flex items-center justify-center">
+                <i class="fa-solid fa-eye" id="privacyIcon"></i>
+            </button>
         </div>
 
         <!-- Scrollable Area -->
         <div class="flex-1 overflow-y-auto p-5 space-y-6">
             
-            <!-- Connection Section -->
+            <!-- Channel Management Section -->
             <div class="space-y-3">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-tower-broadcast text-[10px]"></i> Channels
+                </h2>
+                
+                <!-- Add Channel Button -->
+                <button id="addChannelBtn" class="w-full bg-brand-600/20 hover:bg-brand-600/40 border border-brand-500/30 text-brand-200 py-2.5 rounded-lg text-xs transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add New Channel
+                </button>
+                
+                <!-- Channels List -->
+                <div id="channelsContainer" class="space-y-2 max-h-64 overflow-y-auto">
+                    <!-- Dynamic channel list -->
+                </div>
+            </div>
+            
+            <!-- Connection Section (HIDDEN - Config moved to modal) -->
+            <div class="space-y-3" style="display: none;">
                 <div class="flex items-center justify-between cursor-pointer" onclick="toggleSection('configSection')">
                     <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                         <i class="fa-solid fa-gear text-[10px]"></i> Config
@@ -427,47 +325,7 @@
 
         </div>
 
-    <script>
-    // Playlist toggle logic for mobile
-    const playlistToggleBtn = document.getElementById('playlistToggleBtn');
-    const playlistPanel = document.getElementById('playlistPanel');
-    function showPlaylist() {
-        playlistPanel.classList.remove('translate-y-full');
-        playlistPanel.classList.add('translate-y-0');
-    }
-    function hidePlaylist() {
-        playlistPanel.classList.remove('translate-y-0');
-        playlistPanel.classList.add('translate-y-full');
-    }
-    playlistToggleBtn.addEventListener('click', showPlaylist);
-    // Close button logic
-    const playlistCloseBtn = document.getElementById('playlistCloseBtn');
-    playlistCloseBtn.addEventListener('click', hidePlaylist);
-
-    // Hide playlist when clicking outside (on overlay)
-    playlistPanel.addEventListener('click', function(e) {
-        if (window.innerWidth < 1024 && e.target === playlistPanel) hidePlaylist();
-    });
-    // Optionally, hide on ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && window.innerWidth < 1024) hidePlaylist();
-    });
-
-    // Auto-close playlist overlay when a playlist item is clicked (mobile only)
-    playlistContainer.addEventListener('click', function(e) {
-        if (window.innerWidth < 1024) {
-            // Only close if a playlist item (glass-card or active-item) is clicked
-            let el = e.target;
-            while (el && el !== playlistContainer) {
-                if (el.classList && (el.classList.contains('glass-card') || el.classList.contains('active-item'))) {
-                    hidePlaylist();
-                    break;
-                }
-                el = el.parentElement;
-            }
-        }
-    });
-    </script>
+    </main>
 
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 right-6 glass-panel px-5 py-4 rounded-xl shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 z-50 flex items-center gap-4 border-l-4 border-brand-500">
@@ -480,484 +338,82 @@
         </div>
     </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        // --- DOM Elements ---
-        const settingsForm = document.getElementById('settingsForm');
-        const hostInput = document.getElementById('hostInput');
-        const pathInput = document.getElementById('pathInput');
-        const formatToggle = document.getElementById('formatToggle');
-        const playlistContainer = document.getElementById('playlistContainer');
-        const mainPlayer = document.getElementById('mainPlayer');
-        const playerPlaceholder = document.getElementById('playerPlaceholder');
-        const videoTitle = document.getElementById('videoTitle');
-        const videoDuration = document.getElementById('videoDuration');
-        const videoUrlDisplay = document.getElementById('videoUrlDisplay');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const downloadText = document.getElementById('downloadText');
-        const statusDot = document.getElementById('statusDot');
-        const filterStart = document.getElementById('filterStart');
-        const filterEnd = document.getElementById('filterEnd');
-        const itemCountBadge = document.getElementById('itemCountBadge');
-        const currentConfigDisplay = document.getElementById('currentConfigDisplay');
-        const lastUpdatedDisplay = document.getElementById('lastUpdated');
-        
-        // --- State ---
-        let config = {
-            host: localStorage.getItem('mmtx_host') || 'http://localhost:9996',
-            path: localStorage.getItem('mmtx_path') || '',
-            useMp4: localStorage.getItem('mmtx_mp4') === 'true'
-        };
-
-        // Calendar State
-        let currentCalendarDate = new Date();
-        let selectedDate = new Date();
-        let currentStreamUrl = "";
-
-        // --- Init ---
-        window.addEventListener('DOMContentLoaded', () => {
-            // Restore Settings
-            hostInput.value = config.host;
-            pathInput.value = config.path;
-            formatToggle.checked = config.useMp4;
-
-            // Set Time (Today)
-            setToday();
-
-            // Init Calendar
-            renderCalendar();
-
-            // UI Updates
-            updateStatusUI();
-            startClock();
-
-            // Auto-fetch if configured
-            if(config.host && config.path) {
-                fetchRecordings();
-            }
-        });
-
-        // --- Calendar Logic ---
-        function setToday() {
-            const now = new Date();
-            const start = new Date(now);
-            start.setHours(0, 0, 0, 0);
+    <!-- Channel Modal -->
+    <div id="channelModal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 class="text-lg font-bold text-white" id="modalTitle">Add New Channel</h3>
+                    <p class="text-xs text-gray-400 mt-1" id="modalSubtitle">Configure your MediaMTX stream</p>
+                </div>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
             
-            const end = new Date(now);
-            end.setHours(23, 59, 59, 999);
+            <form id="channelForm" class="modal-body space-y-4">
+                <div class="space-y-2">
+                    <label class="text-xs font-medium text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-tag text-brand-400"></i>
+                        Channel Name
+                    </label>
+                    <input type="text" id="modalChannelName" placeholder="e.g., Front Door Camera" 
+                        class="glass-input w-full rounded-lg py-2.5 px-3 text-sm placeholder-gray-600 focus:outline-none" required>
+                </div>
 
-            setFilterDates(start, end);
-            selectedDate = now;
-            renderCalendar();
-            // After resetting the date range to today, refresh the recordings list
-            // so the UI reflects the new selection immediately.
-            fetchRecordings();
-        }
+                <div class="space-y-2">
+                    <label class="text-xs font-medium text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-server text-brand-400"></i>
+                        Server Host
+                    </label>
+                    <input type="text" id="modalHost" placeholder="http://localhost:9996" 
+                        class="glass-input w-full rounded-lg py-2.5 px-3 text-sm placeholder-gray-600 focus:outline-none" required>
+                    <p class="text-[10px] text-gray-500 ml-1">Base URL of your MediaMTX server</p>
+                </div>
 
-        function setFilterDates(start, end) {
-            const toLocalIso = (date) => {
-                const offset = date.getTimezoneOffset() * 60000;
-                return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-            };
-            filterStart.value = toLocalIso(start);
-            filterEnd.value = toLocalIso(end);
-        }
+                <div class="space-y-2">
+                    <label class="text-xs font-medium text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-video text-brand-400"></i>
+                        Stream Path
+                    </label>
+                    <input type="text" id="modalPath" placeholder="cam1" 
+                        class="glass-input w-full rounded-lg py-2.5 px-3 text-sm placeholder-gray-600 focus:outline-none" required>
+                    <p class="text-[10px] text-gray-500 ml-1">Stream name as configured in MediaMTX</p>
+                </div>
 
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            const monthLabel = document.getElementById('currentMonthYear');
-            
-            grid.innerHTML = '';
-            
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            
-            monthLabel.innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
-
-            const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            // Empty slots for previous month
-            for (let i = 0; i < firstDay; i++) {
-                const el = document.createElement('div');
-                el.className = 'calendar-day empty';
-                grid.appendChild(el);
-            }
-
-            // Days
-            for (let day = 1; day <= daysInMonth; day++) {
-                const el = document.createElement('div');
-                el.className = 'calendar-day';
-                el.innerText = day;
-                
-                // Check if Today
-                const today = new Date();
-                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-                    el.classList.add('today');
-                }
-
-                // Check if Selected
-                if (day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
-                    el.classList.add('active');
-                }
-
-                el.onclick = () => {
-                    selectedDate = new Date(year, month, day);
-                    // Set range to full day
-                    const start = new Date(selectedDate); start.setHours(0,0,0,0);
-                    const end = new Date(selectedDate); end.setHours(23,59,59,999);
-                    setFilterDates(start, end);
-                    renderCalendar(); // Re-render to update selection
-                    fetchRecordings(); // Auto fetch
-                };
-
-                grid.appendChild(el);
-            }
-        }
-
-        document.getElementById('prevMonth').onclick = () => {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-            renderCalendar();
-        };
-
-        document.getElementById('nextMonth').onclick = () => {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-            renderCalendar();
-        };
-
-        // --- Core Application Logic ---
-
-        settingsForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            let host = hostInput.value.trim();
-            if(host.endsWith('/')) host = host.slice(0, -1);
-
-            config.host = host;
-            config.path = pathInput.value.trim();
-            
-            localStorage.setItem('mmtx_host', config.host);
-            localStorage.setItem('mmtx_path', config.path);
-
-            showToast('Configuration Saved', 'Connection settings updated successfully', 'success');
-            updateStatusUI();
-            fetchRecordings();
-        });
-
-        formatToggle.addEventListener('change', (e) => {
-            config.useMp4 = e.target.checked;
-            localStorage.setItem('mmtx_mp4', config.useMp4);
-            showToast('Format Updated', `Now using ${config.useMp4 ? 'MP4' : 'fMP4'} format`, 'info');
-        });
-
-        function updateStatusUI() {
-            if(config.host && config.path) {
-                statusDot.classList.replace('bg-red-500', 'bg-emerald-500');
-                statusDot.classList.replace('shadow-[0_0_10px_rgba(239,68,68,0.5)]', 'shadow-[0_0_10px_rgba(16,185,129,0.5)]');
-                currentConfigDisplay.innerText = `${config.path} @ ${new URL(config.host).hostname}`;
-            } else {
-                statusDot.classList.replace('bg-emerald-500', 'bg-red-500');
-                statusDot.classList.replace('shadow-[0_0_10px_rgba(16,185,129,0.5)]', 'shadow-[0_0_10px_rgba(239,68,68,0.5)]');
-                currentConfigDisplay.innerText = 'Not Configured';
-            }
-        }
-
-        function updateLastRefreshedTime() {
-            const now = new Date();
-            lastUpdatedDisplay.innerText = `Updated: ${now.toLocaleTimeString()}`;
-        }
-
-        async function fetchRecordings() {
-            if(!config.host || !config.path) return;
-
-            // Loader
-            playlistContainer.innerHTML = '<div class="h-full flex items-center justify-center"><div class="loader"></div></div>';
-
-            try {
-                const startDate = new Date(filterStart.value).toISOString();
-                const endDate = new Date(filterEnd.value).toISOString();
-
-                const url = `${config.host}/list?path=${encodeURIComponent(config.path)}&start=${encodeURIComponent(startDate)}&end=${encodeURIComponent(endDate)}`;
-
-                const response = await fetch(url);
-                
-                // --- FIX START: Handle 404 (No recordings) specifically ---
-                if (response.status === 404) {
-                    renderPlaylist([]); // Treat 404 as empty list
-                    updateLastRefreshedTime();
-                    return; // Stop execution so it doesn't hit the error block
-                }
-                // --- FIX END ---
-
-                if (!response.ok) throw new Error('API Error');
-                
-                const data = await response.json();
-                renderPlaylist(data);
-                showToast('Sync Complete', `Found ${data ? data.length : 0} recordings`, 'success');
-                updateLastRefreshedTime();
-
-            } catch (error) {
-                console.error(error);
-                playlistContainer.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-red-400 opacity-80 p-4 text-center">
-                        <i class="fa-solid fa-wifi text-3xl mb-2"></i>
-                        <p class="text-sm font-medium">Connection Failed</p>
-                        <p class="text-xs opacity-60 mt-1">Check CORS settings or URL</p>
+                <div class="flex items-center justify-between bg-black/20 p-3 rounded-lg border border-white/5">
+                    <div>
+                        <span class="text-sm text-gray-200 font-medium">Force MP4 Format</span>
+                        <p class="text-[10px] text-gray-500 mt-0.5">Use MP4 instead of fMP4</p>
                     </div>
-                `;
-                showToast('Error', 'Failed to fetch recordings. Check console.', 'error');
-                updateLastRefreshedTime();
-            }
-        }
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="modalFormatToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+                    </label>
+                </div>
 
-        function renderPlaylist(items) {
-            playlistContainer.innerHTML = '';
+                <div id="connectionStatus" class="hidden p-3 rounded-lg border">
+                    <span class="text-xs text-gray-300" id="connectionStatusText"></span>
+                </div>
+            </form>
             
-            if(!items || items.length === 0) {
-                const selectedDateStr = new Date(filterStart.value).toLocaleDateString();
-                playlistContainer.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-gray-500 opacity-60 text-center px-4">
-                        <i class="fa-regular fa-calendar-xmark text-3xl mb-2"></i>
-                        <p class="text-sm">Recording not found on selected date<br/><span class="font-mono text-xs">${selectedDateStr}</span></p>
-                    </div>
-                `;
-                itemCountBadge.innerText = '0 Clips';
-                return;
-            }
+            <div class="modal-footer">
+                <button type="button" id="cancelModalBtn" class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-sm font-medium transition-colors">
+                    Cancel
+                </button>
+                <button type="button" id="testConnectionBtn" class="px-4 py-2.5 rounded-lg bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/30 text-yellow-200 text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-plug"></i>
+                    Test Connection
+                </button>
+                <button type="submit" form="channelForm" id="saveChannelBtn" class="px-4 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-600/20 text-white text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    Save Channel
+                </button>
+            </div>
+        </div>
+    </div>
 
-            // Sort Descending
-            items.sort((a, b) => new Date(b.start) - new Date(a.start));
-            itemCountBadge.innerText = `${items.length} Clips`;
-
-            items.forEach((item, index) => {
-                const el = document.createElement('div');
-                const start = new Date(item.start);
-                const duration = parseFloat(item.duration);
-                const end = new Date(start.getTime() + (duration * 1000));
-                
-                // Day/Night Logic (Simple 6am - 6pm check)
-                const hour = start.getHours();
-                const isDay = hour >= 6 && hour < 18;
-                const iconClass = isDay ? "fa-sun text-yellow-400" : "fa-moon text-blue-300";
-                const bgClass = isDay ? "bg-yellow-500/10" : "bg-blue-500/10";
-
-                // Format Times
-                const startTimeStr = start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-                const endTimeStr = end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-                
-                // Animation delay staggering
-                const delay = Math.min(index * 0.05, 0.5); 
-                el.style.animationDelay = `${delay}s`;
-
-                el.className = 'glass-card p-3 rounded-xl cursor-pointer opacity-0 animate-fade-in group relative overflow-hidden';
-                
-                el.innerHTML = `
-                    <div class="flex items-center gap-3 relative z-10">
-                        <!-- Icon Box -->
-                        <div class="w-10 h-10 rounded-lg ${bgClass} flex items-center justify-center flex-shrink-0 transition-colors">
-                            <i class="fa-solid ${iconClass} text-sm"></i>
-                        </div>
-
-                        <!-- Info -->
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-center mb-0.5">
-                                <span class="text-xs font-bold text-gray-200 group-hover:text-white truncate">
-                                    ${startTimeStr} <span class="text-gray-600 px-1">→</span> ${endTimeStr}
-                                </span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] text-gray-500 font-mono">${start.toLocaleDateString()}</span>
-                                <span class="text-[10px] font-mono bg-white/5 px-1.5 py-0.5 rounded text-gray-400 border border-white/5">
-                                    ${duration.toFixed(1)}s
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Hover Glow Effect -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                `;
-
-                el.onclick = () => {
-                    // Remove active class from others
-                    document.querySelectorAll('.active-item').forEach(e => {
-                        e.classList.remove('active-item');
-                        e.classList.add('glass-card');
-                    });
-                    
-                    // Add active class
-                    el.classList.remove('glass-card');
-                    el.classList.add('active-item');
-                    
-                    playVideo(item);
-                };
-
-                playlistContainer.appendChild(el);
-            });
-        }
-
-        function playVideo(item) {
-            playerPlaceholder.style.display = 'none';
-
-            let streamUrl = `${config.host}/get?path=${encodeURIComponent(config.path)}&start=${encodeURIComponent(item.start)}&duration=${item.duration}`;
-            
-            if(config.useMp4) {
-                streamUrl += '&format=mp4';
-            }
-
-            currentStreamUrl = streamUrl;
-
-            videoTitle.innerText = `Recording: ${new Date(item.start).toLocaleString()}`;
-            videoDuration.innerText = `${parseFloat(item.duration).toFixed(1)}s`;
-            videoUrlDisplay.innerText = streamUrl;
-            
-            // Enable download button
-            downloadBtn.classList.remove('pointer-events-none', 'opacity-50', 'grayscale');
-            
-            mainPlayer.src = streamUrl;
-            mainPlayer.type = config.useMp4 ? 'video/mp4' : 'video/mp4';
-            mainPlayer.play().catch(console.warn);
-
-            // Scroll for mobile
-            if(window.innerWidth < 1024) {
-                window.scrollTo({top: 0, behavior: 'smooth'});
-            }
-        }
-
-        function copyLink() {
-            const url = videoUrlDisplay.innerText;
-            if(url.length < 5) return;
-            
-            navigator.clipboard.writeText(url).then(() => {
-                showToast('Copied', 'Stream URL copied to clipboard', 'info');
-            });
-        }
-
-        async function triggerDownload() {
-            if (!currentStreamUrl) return;
-
-            const btn = document.getElementById('downloadBtn');
-            const txt = document.getElementById('downloadText');
-            const originalText = "Download";
-
-            try {
-                // UI Loading State
-                btn.disabled = true;
-                btn.classList.add('opacity-75', 'cursor-not-allowed');
-                txt.innerText = "Connecting...";
-
-                const response = await fetch(currentStreamUrl);
-                if (!response.ok) throw new Error("Download failed");
-
-                // Get Content Length (might be null for chunked)
-                const contentLength = response.headers.get('Content-Length');
-                const total = contentLength ? parseInt(contentLength, 10) : 0;
-                let loaded = 0;
-
-                const reader = response.body.getReader();
-                const chunks = [];
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    chunks.push(value);
-                    loaded += value.length;
-
-                    // Update Progress UI
-                    if (total > 0) {
-                        const progress = Math.round((loaded / total) * 100);
-                        txt.innerText = `${progress}%`;
-                    } else {
-                        // If size unknown, show downloaded MB
-                        const mb = (loaded / (1024 * 1024)).toFixed(1);
-                        txt.innerText = `${mb} MB`;
-                    }
-                }
-
-                // Processing Blob
-                txt.innerText = "Saving...";
-                const blob = new Blob(chunks);
-                const url = window.URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                a.download = `recording-${timestamp}.mp4`;
-                
-                document.body.appendChild(a);
-                a.click();
-                
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                showToast('Success', 'Download complete', 'success');
-
-            } catch (error) {
-                console.error("Download error:", error);
-                showToast('Error', 'Failed to download directly. Opening in new tab.', 'error');
-                window.open(currentStreamUrl, '_blank');
-            } finally {
-                // Reset UI
-                txt.innerText = originalText;
-                btn.disabled = false;
-                btn.classList.remove('opacity-75', 'cursor-not-allowed');
-            }
-        }
-
-        // --- Helpers ---
-
-        function showToast(title, message, type) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastTitle').innerText = title;
-            document.getElementById('toastMessage').innerText = message;
-            
-            // Type Styling
-            const icon = document.getElementById('toastIcon');
-            if(type === 'success') {
-                toast.classList.replace('border-brand-500', 'border-emerald-500');
-                icon.className = 'fa-solid fa-check text-emerald-400 text-sm';
-            } else if (type === 'error') {
-                toast.classList.replace('border-brand-500', 'border-red-500');
-                icon.className = 'fa-solid fa-triangle-exclamation text-red-400 text-sm';
-            } else {
-                toast.classList.replace('border-emerald-500', 'border-brand-500');
-                toast.classList.replace('border-red-500', 'border-brand-500');
-                icon.className = 'fa-solid fa-bell text-brand-400 text-sm';
-            }
-
-            toast.classList.remove('translate-y-32', 'opacity-0');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-y-32', 'opacity-0');
-            }, 3000);
-        }
-
-        function startClock() {
-            setInterval(() => {
-                document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-            }, 1000);
-        }
-
-        // Mobile Nav
-        const menuBtn = document.getElementById('menuBtn');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('mobileOverlay');
-
-        const toggleMenu = () => {
-            const isHidden = sidebar.classList.contains('-translate-x-full');
-            if(isHidden) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden', 'opacity-0');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }
-        };
-
-        menuBtn.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-
-    </script>
+    <!-- External JavaScript -->
+    <script src="js/app.js"></script>
 </body>
 </html>
