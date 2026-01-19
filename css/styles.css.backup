@@ -1,20 +1,19 @@
-/* ============================================
-   MediaMTX Web Playlist - Optimized Styles
-   ============================================ */
-
-/* Base Styles */
+/* Animated Background Base */
 body {
     background-color: #0f172a;
     color: #e2e8f0;
     overflow: hidden;
 }
 
-/* Animated Background Blobs */
+/* Ambient Background Blobs */
 .ambient-light {
     position: fixed;
-    inset: 0;
-    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
+    z-index: -1;
 }
 
 .blob {
@@ -31,6 +30,7 @@ body {
     width: 50vw;
     height: 50vw;
     background: #4c1d95;
+    animation-delay: 0s;
 }
 
 .blob-2 {
@@ -51,19 +51,7 @@ body {
     animation-delay: 4s;
 }
 
-@keyframes blob {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-}
-
-@keyframes blob {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-}
-
-/* Glassmorphism Components */
+/* Glassmorphism Utilities */
 .glass-panel {
     background: rgba(15, 23, 42, 0.65);
     backdrop-filter: blur(16px);
@@ -104,7 +92,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* Calendar Grid */
+/* Calendar Styles */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -142,51 +130,72 @@ body {
     cursor: default;
 }
 
-/* Loading Spinners */
-.loader,
-.loader-small {
-    border-radius: 50%;
-    border-style: solid;
-    border-color: rgba(255, 255, 255, 0.1);
-    border-bottom-color: #3b82f6;
-    display: inline-block;
-    animation: rotation 1s linear infinite;
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
 }
 
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Loading Spinner */
 .loader {
     width: 24px;
     height: 24px;
-    border-width: 3px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-bottom-color: #3b82f6;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
 }
 
 .loader-small {
     width: 16px;
     height: 16px;
-    border-width: 2px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-bottom-color: #3b82f6;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
 }
 
 @keyframes rotation {
-    to { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-/* Privacy Blur */
+/* Privacy Blur Styles */
 .privacy-blur {
     filter: blur(6px);
     user-select: none;
-    transition: filter 0.2s;
 }
 
 .privacy-blur:hover {
     filter: blur(4px);
 }
 
-/* Active Items */
 .active-item {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%);
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0) 100%);
     border-left: 3px solid #3b82f6;
 }
 
-/* Channel Items */
+/* Channel Item Styles */
 .channel-item {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -200,12 +209,12 @@ body {
 }
 
 .channel-item.active {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%);
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0) 100%);
     border-left: 3px solid #3b82f6;
     border-color: rgba(59, 130, 246, 0.3);
 }
 
-/* Modal */
+/* Modal Styles */
 .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -244,7 +253,27 @@ body {
     }
 }
 
-/* Latency Badges */
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+/* Latency Badge */
 .latency-badge {
     display: inline-flex;
     align-items: center;
@@ -328,22 +357,4 @@ body {
 
 #playlistContainer::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 130, 246, 0.7);
-}
-
-/* General Custom Scrollbars */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
