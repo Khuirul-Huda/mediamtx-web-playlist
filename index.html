@@ -299,7 +299,7 @@
             <button id="playlistToggleBtn" class="fixed bottom-6 right-6 z-40 bg-brand-500 text-white rounded-full shadow-lg p-4 md:hidden focus:outline-none focus:ring-2 focus:ring-brand-400" type="button" aria-label="Show Recordings">
                 <i class="fa-solid fa-list"></i>
             </button>
-            <div id="playlistPanel" class="w-full lg:w-[420px] glass-panel border-l border-white/5 flex flex-col h-[60vh] max-h-[80vh] lg:h-auto fixed left-0 right-0 bottom-0 top-auto z-50 md:static md:inset-auto md:z-auto transition-transform duration-300 md:translate-x-0 translate-y-full md:translate-y-0 md:block">
+            <div id="playlistPanel" class="w-full lg:w-[420px] glass-panel border-l border-white/5 h-[60vh] max-h-[80vh] lg:h-auto fixed left-0 right-0 bottom-0 top-auto z-50 md:static md:inset-auto md:z-auto transition-transform duration-300 md:translate-x-0 translate-y-full md:translate-y-0 md:block">
                 <!-- Close button, only on mobile (centered above header) -->
                 <button id="playlistCloseBtn" class="md:hidden absolute left-1/2 top-2 -translate-x-1/2 bg-black/70 text-white rounded-full p-2 z-30 shadow-lg" type="button" aria-label="Close Recordings">
                     <i class="fa-solid fa-xmark"></i>
@@ -314,7 +314,7 @@
                     </button>
                 </div>
                 
-                <div class="flex-1 overflow-y-auto p-3 space-y-2" id="playlistContainer">
+                <div class="p-3 space-y-2" id="playlistContainer">
                     <!-- Dynamic Content -->
                     <div class="flex flex-col items-center justify-center h-full text-gray-500 space-y-3 opacity-60">
                         <i class="fa-solid fa-photo-film text-3xl"></i>
@@ -413,7 +413,7 @@
         </div>
     </div>
 
-    <!-- External JavaScript -->
-    <script src="js/app.js"></script>
+    <!-- External JavaScript (ES6 Modules) -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

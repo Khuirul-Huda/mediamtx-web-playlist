@@ -308,3 +308,53 @@ body {
     border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
+/* Fix scrolling in playlist panel */
+#playlistPanel {
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Desktop: make sure panel has full height */
+@media (min-width: 768px) {
+    #playlistPanel {
+        height: 100% !important;
+        max-height: 100% !important;
+    }
+}
+
+/* Mobile: constrain height */
+@media (max-width: 767px) {
+    #playlistPanel {
+        max-height: 80vh !important;
+    }
+}
+
+#playlistContainer {
+    overflow-y: scroll !important; /* Always show scrollbar */
+    overflow-x: hidden !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important; /* Critical for flexbox scrolling */
+    max-height: 100% !important;
+    -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS */
+    position: relative !important;
+}
+
+/* Custom scrollbar styling for playlist */
+#playlistContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#playlistContainer::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+#playlistContainer::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 4px;
+}
+
+#playlistContainer::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.7);
+}
