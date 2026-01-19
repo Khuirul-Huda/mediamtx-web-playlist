@@ -5,15 +5,26 @@
 import DOM from '../config/domElements.js';
 import appState from '../state/appState.js';
 
+// Toast timeout tracker
+let toastTimeout = null;
+
 // Toast Notification
 export function showToast(title, message, type) {
     if (!DOM.toast) return;
     
+    // Clear any existing timeout
+    if (toastTimeout) {
+        clearTimeout(toastTimeout);
+        toastTimeout = null;
+    }
+    
     DOM.toastTitle.innerText = title;
     DOM.toastMessage.innerText = message;
     
-    DOM.toast.className = 'fixed bottom-6 right-6 glass-panel px-5 py-4 rounded-xl shadow-2xl transform translate-y-0 opacity-100 transition-all duration-500 z-50 flex items-center gap-4 border-l-4';
+    // Reset to base classes
+    DOM.toast.className = 'fixed bottom-6 right-6 glass-panel px-5 py-4 rounded-xl shadow-2xl transform transition-all duration-500 z-50 flex items-center gap-4 border-l-4';
     
+    // Add type-specific styling
     if (type === 'success') {
         DOM.toast.classList.add('border-emerald-500');
         DOM.toastIcon.className = 'fa-solid fa-check text-emerald-400 text-sm';
@@ -25,8 +36,15 @@ export function showToast(title, message, type) {
         DOM.toastIcon.className = 'fa-solid fa-bell text-brand-400 text-sm';
     }
     
-    setTimeout(() => {
+    // Show toast (force reflow for animation)
+    DOM.toast.classList.remove('translate-y-32', 'opacity-0');
+    DOM.toast.classList.add('translate-y-0', 'opacity-100');
+    
+    // Auto close after 3 seconds
+    toastTimeout = setTimeout(() => {
+        DOM.toast.classList.remove('translate-y-0', 'opacity-100');
         DOM.toast.classList.add('translate-y-32', 'opacity-0');
+        toastTimeout = null;
     }, 3000);
 }
 
