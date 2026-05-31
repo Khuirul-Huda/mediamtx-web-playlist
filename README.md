@@ -83,7 +83,7 @@ This UI expects the following endpoints on the configured host:
   - A `404` response is treated as "no recordings".
 
 - `GET /get?path=<path>&start=<ISO>&duration=<seconds>&format=mp4` (optional format)
-  - Returns the raw media stream (mp4 or chunked). The UI uses this URL to play or download.
+  - Returns the raw media stream (mp4 or chunked). The UI uses this URL to play or download. Seek operations request the same endpoint again with `start` shifted to the desired position and `duration` reduced to the remaining clip length.
 
 If your MediaMTX instance uses different endpoints, adapt the host or provide a small proxy that matches the expected routes.
 
@@ -121,4 +121,4 @@ See repository for license information.
 - Desktop application ?
 
 ## Known Issues
-- Playback not seekable due to server limitations. See: [https://github.com/bluenviron/mediamtx/issues/4199](https://github.com/bluenviron/mediamtx/issues/4199)
+- MediaMTX playback streams are seeked by requesting `/get` again with an adjusted `start` value. See: [https://github.com/bluenviron/mediamtx/issues/4199](https://github.com/bluenviron/mediamtx/issues/4199)

@@ -6,6 +6,52 @@ import DOM from '../config/domElements.js';
 import appState from '../state/appState.js';
 import { showToast } from '../utils/uiUtils.js';
 
+let currentRecording = null;
+let isSeeking = false;
+
+function buildStreamUrl(channel, item, offset = 0) {
+    const startDate = new Date(new Date(item.start).getTime() + (offset * 1000));
+    const duration = Math.max(parseFloat(item.duration) - offset, 0.1);
+    let streamUrl = `${channel.host}/get?path=${encodeURIComponent(channel.path)}&start=${encodeURIComponent(startDate.toISOString())}&duration=${duration}`;
+
+    if (channel.useMp4) {
+        streamUrl += '&format=mp4';
+    }
+
+    return streamUrl;
+}
+
+function updateStreamUrl(streamUrl) {
+    appState.setCurrentStreamUrl(streamUrl);
+    DOM.videoUrlDisplay.innerText = streamUrl;
+}
+
+function handleSeek() {
+    if (!currentRecording || isSeeking) return;
+
+    const offset = currentRecording.offset + DOM.mainPlayer.currentTime;
+    const duration = parseFloat(currentRecording.item.duration);
+    if (!Number.isFinite(offset) || !Number.isFinite(duration) || offset < 0 || offset >= duration) return;
+
+    const streamUrl = buildStreamUrl(currentRecording.channel, currentRecording.item, offset);
+    const wasPaused = DOM.mainPlayer.paused;
+    isSeeking = true;
+
+    currentRecording.offset = offset;
+    updateStreamUrl(streamUrl);
+    DOM.mainPlayer.src = streamUrl;
+    DOM.mainPlayer.load();
+
+    DOM.mainPlayer.addEventListener('loadedmetadata', () => {
+        isSeeking = false;
+        if (!wasPaused) {
+            DOM.mainPlayer.play().catch(console.warn);
+        }
+    }, { once: true });
+}
+
+DOM.mainPlayer.addEventListener('seeking', handleSeek);
+
 // Play a video recording
 export function playVideo(item) {
     const channel = appState.currentChannel;
@@ -13,13 +59,9 @@ export function playVideo(item) {
     
     DOM.playerPlaceholder.style.display = 'none';
     
-    let streamUrl = `${channel.host}/get?path=${encodeURIComponent(channel.path)}&start=${encodeURIComponent(item.start)}&duration=${item.duration}`;
-    
-    if (channel.useMp4) {
-        streamUrl += '&format=mp4';
-    }
-    
-    appState.setCurrentStreamUrl(streamUrl);
+    currentRecording = { channel, item, offset: 0 };
+    const streamUrl = buildStreamUrl(channel, item);
+    updateStreamUrl(streamUrl);
     
     const recordingDate = new Date(item.start).toLocaleString();
     DOM.videoTitle.innerText = `Recording: ${recordingDate}`;
@@ -31,13 +73,14 @@ export function playVideo(item) {
     } else {
         DOM.videoUrlDisplay.classList.remove('privacy-blur');
     }
-    DOM.videoUrlDisplay.innerText = streamUrl;
-    
     DOM.downloadBtn.classList.remove('pointer-events-none', 'opacity-50', 'grayscale');
     
+    isSeeking = true;
     DOM.mainPlayer.src = streamUrl;
     DOM.mainPlayer.type = channel.useMp4 ? 'video/mp4' : 'video/mp4';
-    DOM.mainPlayer.play().catch(console.warn);
+    DOM.mainPlayer.play().catch(console.warn).finally(() => {
+        isSeeking = false;
+    });
     
     if (window.innerWidth < 1024) {
         window.scrollTo({
